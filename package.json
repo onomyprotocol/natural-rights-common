@@ -1,6 +1,6 @@
 {
   "name": "@natural-rights/common",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Shared code/types for Natural Rights service/client/primitives",
   "main": "build/main/index.js",
   "typings": "build/main/index.d.ts",

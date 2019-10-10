@@ -569,7 +569,7 @@ export interface NRGetPubKeysResult extends NRResultBase {
  * Parameters to request for public keys
  */
 export interface NRGetPubKeysActionPayload {
-  readonly kind: NRGrantKind
+  readonly kind: NRSignatureKind
   readonly id: string
 }
 

@@ -1,11 +1,11 @@
 {
   "name": "@natural-rights/common",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Shared code/types for Natural Rights service/client/primitives",
   "main": "build/main/index.js",
   "typings": "build/main/index.d.ts",
   "module": "build/module/index.js",
-  "repository": "git@gitlab.com:nodehaven/natural-rights-common.git",
+  "repository": "git+sshcd @gitlab.com:nodehaven/natural-rights-common.git",
   "license": "MIT",
   "keywords": [],
   "scripts": {
@@ -13,7 +13,7 @@
     "build": "run-s clean && run-p build:*",
     "build:main": "tsc -p tsconfig.json",
     "build:module": "tsc -p tsconfig.module.json",
-    "prepate": "run-s build",
+    "prepare": "run-s build",
     "fix": "run-s fix:*",
     "fix:prettier": "prettier \"src/**/*.ts\" --write",
     "fix:tslint": "tslint --fix --project .",

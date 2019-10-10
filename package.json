@@ -1,11 +1,11 @@
 {
   "name": "@natural-rights/common",
-  "version": "1.0.0",
-  "description": "Shared code for Natural Rights service/client",
+  "version": "0.0.1",
+  "description": "Shared code/types for Natural Rights service/client/primitives",
   "main": "build/main/index.js",
   "typings": "build/main/index.d.ts",
   "module": "build/module/index.js",
-  "repository": "https://github.com/go1dfish/@natural-rights/common",
+  "repository": "git@gitlab.com:nodehaven/natural-rights-common.git",
   "license": "MIT",
   "keywords": [],
   "scripts": {
@@ -13,6 +13,7 @@
     "build": "run-s clean && run-p build:*",
     "build:main": "tsc -p tsconfig.json",
     "build:module": "tsc -p tsconfig.module.json",
+    "prepate": "run-s build",
     "fix": "run-s fix:*",
     "fix:prettier": "prettier \"src/**/*.ts\" --write",
     "fix:tslint": "tslint --fix --project .",
@@ -84,7 +85,8 @@
     }
   },
   "prettier": {
-    "singleQuote": true
+    "singleQuote": true,
+    "semi": false
   },
   "nyc": {
     "extends": "@istanbuljs/nyc-config-typescript",

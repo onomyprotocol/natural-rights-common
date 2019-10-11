@@ -65,6 +65,7 @@ export type NRResult =
   | NRUpdateDocumentResult
   | NRGetPubKeysResult
   | NRGetKeyPairsResult
+  | NRErrorResult
 
 /**
  * Common fields shared by all NRResult's
@@ -73,6 +74,12 @@ export interface NRResultBase {
   readonly type: string
   readonly success: boolean
   readonly error: string
+}
+
+export interface NRErrorResult extends NRResultBase {
+  readonly payload: NRAction['payload'] | null
+  readonly type: NRAction['type']
+  readonly success: false
 }
 
 /**

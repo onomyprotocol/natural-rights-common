@@ -1,11 +1,11 @@
 {
   "name": "@natural-rights/common",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Shared code/types for Natural Rights service/client/primitives",
   "main": "build/main/index.js",
   "typings": "build/main/index.d.ts",
   "module": "build/module/index.js",
-  "repository": "git+sshcd @gitlab.com:nodehaven/natural-rights-common.git",
+  "repository": "git+ssh@gitlab.com:nodehaven/natural-rights-common.git",
   "license": "MIT",
   "keywords": [],
   "scripts": {

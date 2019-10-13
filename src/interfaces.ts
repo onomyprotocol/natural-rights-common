@@ -693,3 +693,45 @@ export interface NRKeyPair {
   readonly pubKey: string
   readonly privKey: string
 }
+
+export interface NRClientCrypto {
+  readonly cryptPubKey: string
+  readonly signPubKey: string
+
+  readonly createAccount: () => Promise<{
+    readonly cryptPubKey: string
+    readonly cryptTransformKey: string
+    readonly encCryptPrivKey: string
+    readonly encSignPrivKey: string
+    readonly signPubKey: string
+  }>
+
+  readonly createDocument: (params: {
+    readonly accountCryptPubKey: string
+  }) => Promise<{
+    readonly encCryptPrivKey: string
+  }>
+
+  readonly cryptTransformKeyGen: (toCryptPubKey: string) => Promise<string>
+
+  readonly decryptKey: (ciphertext: string) => Promise<string>
+
+  readonly decryptDocumentTexts: (
+    ciphertexts: readonly string[],
+    encPrivKey: string
+  ) => Promise<readonly string[]>
+
+  readonly encryptKey: (pubKey: string, plaintext: string) => Promise<string>
+
+  readonly encryptDocumentTexts: (params: {
+    readonly plaintexts: readonly string[]
+    readonly cryptPubKey?: string
+    readonly encCryptPrivKey?: string
+  }) => Promise<{
+    readonly ciphertexts: readonly string[]
+    readonly encCryptPrivKey: string
+    readonly cryptPubKey: string
+  }>
+
+  readonly sign: (text: string) => Promise<string>
+}

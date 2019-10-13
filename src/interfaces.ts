@@ -695,43 +695,51 @@ export interface NRKeyPair {
 }
 
 export interface NRClientCrypto {
-  readonly cryptPubKey: string
-  readonly signPubKey: string
+  readonly clientCryptPubKey: string
+  readonly clientSignPubKey: string
 
   readonly createAccount: () => Promise<{
-    readonly cryptPubKey: string
-    readonly cryptTransformKey: string
-    readonly encCryptPrivKey: string
-    readonly encSignPrivKey: string
-    readonly signPubKey: string
+    readonly accountCryptPubKey: string
+    readonly accountEncCryptPrivKey?: string
+    readonly accountEncSignPrivKey?: string
+    readonly accountSignPubKey: string
+    readonly clientCryptTransformKey: string
+  }>
+
+  readonly createClientAuthorization: (params: {
+    readonly accountCryptPubKey: string
+    readonly accountEncCryptPrivKey: string
+    readonly clientCryptPubKey: string
+  }) => Promise<{
+    readonly clientCryptTransformKey: string
   }>
 
   readonly createDocument: (params: {
     readonly accountCryptPubKey: string
   }) => Promise<{
-    readonly encCryptPrivKey: string
+    readonly documentCryptPubKey: string
+    readonly documentEncCryptPrivKey: string
   }>
-
-  readonly cryptTransformKeyGen: (toCryptPubKey: string) => Promise<string>
-
-  readonly decryptKey: (ciphertext: string) => Promise<string>
 
   readonly decryptDocumentTexts: (
     ciphertexts: readonly string[],
-    encPrivKey: string
+    documentEncCryptPrivKey: string
   ) => Promise<readonly string[]>
 
-  readonly encryptKey: (pubKey: string, plaintext: string) => Promise<string>
+  readonly decryptKey: (encKey: string) => Promise<string>
 
   readonly encryptDocumentTexts: (params: {
+    readonly accountCryptPubKey: string
+    readonly documentCryptPubKey?: string
+    readonly documentEncCryptPrivKey?: string
     readonly plaintexts: readonly string[]
-    readonly cryptPubKey?: string
-    readonly encCryptPrivKey?: string
   }) => Promise<{
     readonly ciphertexts: readonly string[]
-    readonly encCryptPrivKey: string
-    readonly cryptPubKey: string
+    readonly documentEncCryptPrivKey: string
+    readonly documentCryptPubKey: string
   }>
+
+  readonly encryptKey: (cryptPubKey: string, key: string) => Promise<string>
 
   readonly sign: (text: string) => Promise<string>
 }

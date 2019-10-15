@@ -26,7 +26,7 @@ export interface NRResponse {
  * Any action supported by the Natural Rights service API
  */
 export type NRAction =
-  | NRInitializeAccountAction
+  | NRInitializeAccountAction // Going away
   | NRLoginAction
   | NRAuthorizeClientAction
   | NRDeauthorizeClientAction
@@ -168,8 +168,13 @@ export interface NRAuthorizeClientResult extends NRResultBase {
  */
 export interface NRAuthorizeClientActionPayload {
   readonly clientId: string
-  readonly accountId: string
   readonly cryptTransformKey: string
+
+  // If new account:
+  readonly accountSignPubKey?: string
+  readonly accountCryptPubKey?: string
+  readonly accountEncCryptPrivKey?: string
+  readonly accountEncSignPrivKey?: string
 }
 
 /**
@@ -695,51 +700,113 @@ export interface NRKeyPair {
 }
 
 export interface NRClientCrypto {
-  readonly clientCryptPubKey: string
-  readonly clientSignPubKey: string
+  /**
+   * Sign one or more NRAction's with this account or client
+   */
+  readonly signRequest: (params: {
+    readonly actions: readonly NRAction[]
+    readonly as?: 'client' | 'account'
+  }) => Promise<NRRequest>
 
-  readonly createAccount: () => Promise<{
-    readonly accountCryptPubKey: string
-    readonly accountEncCryptPrivKey?: string
-    readonly accountEncSignPrivKey?: string
-    readonly accountSignPubKey: string
-    readonly clientCryptTransformKey: string
-  }>
-
-  readonly createClientAuthorization: (params: {
+  /**
+   * Authorize a client on an account
+   */
+  readonly createClientAuth?: (params: {
     readonly accountCryptPubKey: string
     readonly accountEncCryptPrivKey: string
     readonly clientCryptPubKey: string
   }) => Promise<{
+    // The PRE transform key from account -> client
     readonly clientCryptTransformKey: string
   }>
 
-  readonly createDocument: (params: {
+  /**
+   * Return account credentials to register with service
+   *
+   * May go away after next refactor stage and can be ignored by companion
+   */
+  readonly createAccount?: () => Promise<{
+    readonly accountCryptPubKey: string
+    readonly accountSignPubKey: string
+
+    // Optional encrypted account secrets for NR service management
+    readonly accountEncCryptPrivKey?: string
+    readonly accountEncSignPrivKey?: string
+  }>
+
+  /**
+   * Generate and encrypt keypair for a document
+   */
+  readonly createDocument?: (params: {
     readonly accountCryptPubKey: string
   }) => Promise<{
     readonly documentCryptPubKey: string
+
+    // Document encryption key encrypted with account pub key
     readonly documentEncCryptPrivKey: string
   }>
 
-  readonly decryptDocumentTexts: (
-    ciphertexts: readonly string[],
-    documentEncCryptPrivKey: string
-  ) => Promise<readonly string[]>
+  /**
+   * Generate an encrypted document private key for the grantee
+   */
+  readonly createGrant?: (params: {
+    readonly granteeCryptPubKey: string
+    readonly documentEncCryptPrivKey: string
+  }) => Promise<{
+    // Document encryption key encrypted with grantee pub key
+    readonly documentEncCryptPrivKeyForGrantee: string
+  }>
 
-  readonly decryptKey: (encKey: string) => Promise<string>
-
-  readonly encryptDocumentTexts: (params: {
+  /**
+   * Generate and encrypt keypairs for a group
+   */
+  readonly createGroup?: (params: {
     readonly accountCryptPubKey: string
-    readonly documentCryptPubKey?: string
-    readonly documentEncCryptPrivKey?: string
+  }) => Promise<{
+    readonly groupCryptPubKey: string
+
+    // Encrypted with account public key
+    readonly groupEncCryptPrivKey: string
+
+    // Encrypted with account public key
+    readonly groupEncSignPrivKey: string
+
+    readonly groupSignPubKey: string
+  }>
+
+  /**
+   * Generate transform key and optional encrypted private key for group member
+   */
+  readonly createMembership?: (params: {
+    readonly groupCryptPubKey: string
+    readonly groupEncCryptPrivKey: string
+    readonly memberCryptPubKey: string
+    readonly admin?: boolean
+  }) => Promise<{
+    // Encryption transform key from group -> member
+    readonly memberCryptTransformKey: string
+
+    // If adding as admin, this should be the group crypt priv key encrypted with member pub key
+    readonly encCryptPrivKey?: string
+  }>
+
+  /**
+   * Encrypt a collection of ciphertexts for a given document
+   */
+  readonly encryptDocumentTexts?: (params: {
+    readonly documentEncCryptPrivKey: string
     readonly plaintexts: readonly string[]
   }) => Promise<{
     readonly ciphertexts: readonly string[]
-    readonly documentEncCryptPrivKey: string
-    readonly documentCryptPubKey: string
   }>
 
-  readonly encryptKey: (cryptPubKey: string, key: string) => Promise<string>
-
-  readonly sign: (text: string) => Promise<string>
+  /**
+   * Decrypt a collection of ciphertexts from a given document
+   */
+  readonly decryptDocumentTexts?: (params: {
+    readonly documentEncCryptPrivKey: string
+    readonly ciphertexts: readonly string[]
+  }) => Promise<{
+    readonly ciphertexts: readonly string[]
+  }>
 }

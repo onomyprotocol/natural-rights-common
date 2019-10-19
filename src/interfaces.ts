@@ -1,3 +1,101 @@
+export interface NRClient {
+  readonly accountId: string
+  readonly clientId: string
+  readonly rootDocumentId: string
+
+  readonly login: () => Promise<{
+    readonly accountId: string
+    readonly rootDocumentId: string
+  }>
+
+  readonly registerAccount: () => Promise<{
+    readonly accountId: string
+    readonly rootDocumentId: string
+  }>
+
+  readonly authorizeClient: (clientToAuthSignPubKey: string) => Promise<void>
+
+  readonly deauthorizeClient: (
+    clientToDeauthSignPubKey?: string
+  ) => Promise<void>
+
+  readonly createGroup: () => Promise<string>
+
+  readonly addReaderToGroup: (
+    groupSignPubKey: string,
+    memberAccountSignPubKey: string
+  ) => Promise<void>
+
+  readonly addSignerToGroup: (
+    groupSignPubKey: string,
+    memberAccountSignPubKey: string
+  ) => Promise<void>
+
+  readonly removeMemberFromGroup: (
+    groupSignPubKey: string,
+    memberAccountSignPubKey: string
+  ) => Promise<void>
+
+  readonly addAdminToGroup: (
+    groupSignPubKey: string,
+    memberAccountSignPubKey: string
+  ) => Promise<void>
+
+  readonly removeAdminFromGroup: (
+    groupSignPubKey: string,
+    adminToRemoveAccountSignPubKey: string
+  ) => Promise<void>
+
+  readonly createDocument: () => Promise<{ readonly id: string }>
+
+  readonly grantReadAccess: (
+    documentSignPubKey: string,
+    grantKind: NRGrantKind,
+    granteeSignPubKey: string
+  ) => Promise<void>
+
+  readonly grantSignAccess: (
+    documentSignPubKey: string,
+    grantKind: NRGrantKind,
+    granteeSignPubKey: string
+  ) => Promise<void>
+
+  readonly revokeAccess: (
+    documentSignPubKey: string,
+    grantKind: NRGrantKind,
+    granteeSignPubKey: string
+  ) => Promise<void>
+
+  readonly signDocumentHashes: (
+    documentSignPubKey: string,
+    hashes: readonly string[]
+  ) => Promise<readonly string[]>
+
+  readonly decryptDocumentTexts: (
+    documentSignPubKey: string,
+    ciphertexts: readonly string[]
+  ) => Promise<readonly string[]>
+
+  readonly signDocumentTexts: (
+    documentSignPubKey: string,
+    textsToSign: readonly string[]
+  ) => Promise<readonly string[]>
+
+  readonly encryptDocumentTexts: (
+    documentSignPubKey: string,
+    plaintexts: readonly string[]
+  ) => Promise<
+    ReadonlyArray<
+      | string
+      | {
+          readonly ct: any
+          readonly iv: any
+          readonly s: any
+        }
+    >
+  >
+}
+
 /**
  * Interface to a local or remote instance of the Natural Rights service
  */
@@ -167,6 +265,7 @@ export interface NRAuthorizeClientResult extends NRResultBase {
  * Parameters to Authorize Client request
  */
 export interface NRAuthorizeClientActionPayload {
+  readonly accountId: string
   readonly clientId: string
   readonly cryptTransformKey: string
 
@@ -701,6 +800,16 @@ export interface NRKeyPair {
 
 export interface NRClientCrypto {
   /**
+   * Return any public keys this instance has private keys for
+   */
+  readonly publicKeys: () => {
+    readonly accountCryptPubKey?: string
+    readonly accountSignPubKey?: string
+    readonly clientSignPubKey?: string
+    readonly clientCryptPubKey?: string
+  }
+
+  /**
    * Sign one or more NRAction's with this account or client
    */
   readonly signRequest: (params: {
@@ -732,6 +841,9 @@ export interface NRClientCrypto {
     // Optional encrypted account secrets for NR service management
     readonly accountEncCryptPrivKey?: string
     readonly accountEncSignPrivKey?: string
+
+    // Optionally include this if not using account keys directly
+    readonly clientCryptTransformKey?: string
   }>
 
   /**
@@ -750,7 +862,7 @@ export interface NRClientCrypto {
    * Generate an encrypted document private key for the grantee
    */
   readonly createGrant?: (params: {
-    readonly granteeCryptPubKey: string
+    readonly granteeCryptPubKey: string     
     readonly documentEncCryptPrivKey: string
   }) => Promise<{
     // Document encryption key encrypted with grantee pub key
@@ -764,6 +876,8 @@ export interface NRClientCrypto {
     readonly accountCryptPubKey: string
   }) => Promise<{
     readonly groupCryptPubKey: string
+
+    readonly memberCryptTransformKey: string // Transform key for creator
 
     // Encrypted with account public key
     readonly groupEncCryptPrivKey: string
@@ -807,6 +921,6 @@ export interface NRClientCrypto {
     readonly documentEncCryptPrivKey: string
     readonly ciphertexts: readonly string[]
   }) => Promise<{
-    readonly ciphertexts: readonly string[]
+    readonly plaintexts: readonly string[]
   }>
 }
